@@ -6,11 +6,7 @@ import java.net.Socket;
 import java.util.Scanner;
 
 import java.awt.BorderLayout;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 
 public class TCPClient {
@@ -18,9 +14,25 @@ public class TCPClient {
     Scanner in;
     PrintWriter out;
     JFrame frame = new JFrame("Polite messaging");
-    JTextField textField = new JTextField(50);
+    JTextField messageField = new JTextField(50);
+    JTextField topicField = new JTextField("Topic");
+    JTextField subjectField = new JTextField("Subject");
     JTextArea messageArea = new JTextArea(16, 50);
-
+    JButton button = new JButton();
+    String topic = "";
+    String subject = "";
+    public void setTopic(String Topic) {
+        topic = Topic;
+    }
+    public void setSubject(String Subject) {
+        subject = Subject;
+    }
+    public String getTopic(){
+        return topic;
+    }
+    public String getSubject(){
+        return subject;
+    }
     /**
      * Constructs the client by laying out the GUI and registering a listener with
      * the textfield so that pressing Return in the listener sends the textfield
@@ -29,19 +41,44 @@ public class TCPClient {
      * NAMEACCEPTED message from the server.
      */
     public TCPClient() {
-        textField.setEditable(false);
+
+        subjectField.setBounds(0, 237, 150, 20);
+        topicField.setBounds(0,217, 150, 20);
+        messageField.setEditable(false);
+        topicField.setEditable(false);
+        subjectField.setEditable(false);
         messageArea.setEditable(false);
-        frame.getContentPane().add(textField, BorderLayout.SOUTH);
+
+        frame.getContentPane().add(subjectField);
+        frame.getContentPane().add(topicField);
+        frame.getContentPane().add(messageField, BorderLayout.SOUTH);
         frame.getContentPane().add(new JScrollPane(messageArea), BorderLayout.CENTER);
         frame.pack();
 
         // Send on enter then clear to prepare for next message
-        textField.addActionListener(new ActionListener() {
+        messageField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                out.println(textField.getText());
-                textField.setText("");
+                out.println(messageField.getText());
+                messageField.setText("");
+                setTopic(topicField.getText());
+                setSubject(subjectField.getText());
+                System.out.println("this is being called");
             }
         });
+        /*topicField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                out.println(subjectField.getText());
+                subjectField.setText("");
+            }
+        });
+        subjectField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                out.println(subjectField.getText());
+                subjectField.setText("");
+            }
+        });
+
+         */
     }
 
     private String getName() {
@@ -63,7 +100,9 @@ public class TCPClient {
                     out.println(getName());
                 } else if (line.startsWith("NAMEACCEPTED")) {
                     this.frame.setTitle("Chatter - " + line.substring(13));
-                    textField.setEditable(true);
+                    messageField.setEditable(true);
+                    topicField.setEditable(true);
+                    subjectField.setEditable(true);
                 } else if (line.startsWith("MESSAGE")) {
                     messageArea.append(line.substring(8) + "\n");
                 }

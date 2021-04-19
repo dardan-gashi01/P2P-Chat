@@ -1,11 +1,40 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
 public class Handler implements Runnable{
+
+    private String time = "Time";
+    private String topic = "null";
+    private String subject = "null";
+    private int contents  = 1;
+
+
+    public static StringBuffer getHash(String word) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(word.getBytes());
+        byte[] D = digest.digest();
+        StringBuffer sb = new StringBuffer();
+        for(byte b : D){
+            sb.append(String.format("%02x", b & 0xff));
+        }
+        return sb;
+    }
+/*
+    public static void toBinaryString(String s){
+        byte[] arr = s.getBytes(UTF_8);
+
+        for (byte b: arr) {
+            System.out.println(Integer.toBinaryString(b));
+        }
+    }
+
+ */
 
     // All client names, so we can check for duplicates upon registration.
     private static Set<String> names = new HashSet<>();
@@ -66,11 +95,19 @@ public class Handler implements Runnable{
             // Accept messages from this client and broadcast them.
             while (true) {
                 String input = in.nextLine();
-                if (input.toLowerCase().startsWith("/quit")) {
+                if (input.toLowerCase().startsWith("bye!")) {
                     return;
                 }
                 for (PrintWriter writer : writers) {
-                    writer.println("MESSAGE " + name + ": " + input);
+                    TCPClient client = new TCPClient();
+                   // writer.println("MESSAGE " + name + ": " + input);
+                    writer.println("\nMESSAGE " + "Message-id: " + getHash(input));
+                    writer.println("MESSAGE " + "Time-sent: " + time);
+                    writer.println("MESSAGE " + "From: " + name);
+                    writer.println("MESSAGE " + "Topic: #" + client.getTopic());
+                    writer.println("MESSAGE " + "Subject: " + client.getSubject());
+                    writer.println("MESSAGE " + "Contents: " + contents);
+                    writer.println("MESSAGE " + input + "\n");
                 }
             }
         } catch (Exception e) {
